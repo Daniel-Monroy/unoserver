@@ -18,23 +18,23 @@ RUN groupadd -r ${GID} && useradd -r -g ${GID} -d /home/${UID} -m -s /bin/bash $
 
 # Install required packages
 RUN apt-get update && apt-get install -y \
-    bash curl net-tools nodejs npm \
-    python3-pip \
-    libreoffice \
-    supervisor \
-    fonts-noto fonts-noto-cjk fonts-noto-color-emoji \
-    fonts-terminus \
-    fonts-font-awesome \
-    fonts-dejavu \
-    fonts-freefont-ttf \
-    fonts-hack-ttf \
-    fonts-inconsolata \
-    fonts-liberation \
-    fonts-mononoki \
-    fonts-open-sans \
-    fontconfig && \
-    fc-cache -f && \
-    rm -rf /var/lib/apt/lists/*
+  bash curl net-tools nodejs npm \
+  python3-pip \
+  libreoffice \
+  supervisor \
+  fonts-noto fonts-noto-cjk fonts-noto-color-emoji \
+  fonts-terminus \
+  fonts-font-awesome \
+  fonts-dejavu \
+  fonts-freefont-ttf \
+  fonts-hack-ttf \
+  fonts-inconsolata \
+  fonts-liberation \
+  fonts-mononoki \
+  fonts-open-sans \
+  fontconfig && \
+  fc-cache -f && \
+  rm -rf /var/lib/apt/lists/*
 
 ARG VERSION_ADOPTIUM_TEMURIN="17.0.7"
 RUN apt-get update && apt-get install -y default-jdk
@@ -48,8 +48,8 @@ RUN pip3 install -U unoserver
 # Setup supervisor
 COPY --chown=${UID}:${GID} ${BUILD_CONTEXT}/supervisor /
 RUN chmod +x /config/entrypoint.sh && \
-    chown -R ${UID}:0 /run && \
-    chmod -R g=u /run
+  chown -R ${UID}:0 /run && \
+  chmod -R g=u /run
 
 USER ${UID}
 WORKDIR /home/worker

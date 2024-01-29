@@ -1,36 +1,29 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { exec } = require('child_process');
 
 const app = express();
 
-app.use(bodyParser.json());
-app.use(express.json({ limit: '50mb' }));
+// Configurar límites para JSON y urlencoded
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
-//
-const upload = multer({ dest: 'uploads/' });
-
-app.post('/convert', upload.single('file'), (req, res) => {
+app.post('/convert', (req, res) => {
   if (!req.body || !req.body.fileBase64) {
-    return res
-      .status(400)
-      .send('No se ha proporcionado archivo en formato base64.');
+    return res.status(400).send('No se ha proporcionado archivo en formato base64.');
   }
 
   const fileBase64 = req.body.fileBase64;
-
-  // Decodificar la cadena base64 a un buffer
   const buffer = Buffer.from(fileBase64, 'base64');
 
-  // Crear un archivo temporal para la conversiÔøΩn
+  // Directorio para archivos temporales
   const tempDir = 'uploads';
   const inputFilePath = path.join(tempDir, 'tempFile.xlsx');
   const outputFilePath = path.join(tempDir, 'outputFile.pdf');
 
-  // Asegurarse de que el directorio 'uploads' existe
+  // Crear directorio si no existe
   if (!fs.existsSync(tempDir)) {
     fs.mkdirSync(tempDir);
   }
@@ -38,25 +31,26 @@ app.post('/convert', upload.single('file'), (req, res) => {
   // Escribir el buffer en un archivo
   fs.writeFileSync(inputFilePath, buffer);
 
-  // Ejecutar el comando de conversi√≥n
-  exec(
-    `unoconvert --convert-to pdf ${inputFilePath} ${outputFilePath}`,
-    (err, stdout, stderr) => {
-      if (err) {
-        // Limpiar: eliminar el archivo de entrada
-        // fs.unlinkSync(inputFilePath);
-        return res
-          .status(500)
-          .send(`Error durante la conversi√≥n: ${err.message}`);
-      }
-      // Enviar el archivo PDF convertido
-      res.download(outputFilePath, () => {
-        // Limpiar: eliminar los archivos de entrada y salida
-        fs.unlinkSync(inputFilePath);
+  // Ejecutar comando de conversión
+  exec(`unoconvert --convert-to pdf ${inputFilePath} ${outputFilePath}`, (err, stdout, stderr) => {
+    // Limpiar: eliminar el archivo de entrada independientemente del resultado
+    if (fs.existsSync(inputFilePath)) {
+      fs.unlinkSync(inputFilePath);
+    }
+
+    if (err) {
+      // Enviar respuesta de error
+      return res.status(500).send(`Error durante la conversión: ${err.message}`);
+    }
+
+    // Enviar el archivo PDF convertido
+    res.download(outputFilePath, () => {
+      // Limpiar: eliminar el archivo de salida
+      if (fs.existsSync(outputFilePath)) {
         fs.unlinkSync(outputFilePath);
-      });
-    },
-  );
+      }
+    });
+  });
 });
 
-app.listen(3000, () => console.log('Servidor ejecut√°ndose en el puerto 3000'));
+app.listen(3000, () => console.log('Servidor ejecutándose en el puerto 3000'));
