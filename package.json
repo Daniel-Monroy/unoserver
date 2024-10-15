@@ -1,15 +1,16 @@
 {
   "name": "conversion-app",
   "version": "1.0.0",
-  "description": "Aplicaci√≥n para convertir archivos usando unoserver",
+  "description": "Aplicación para convertir archivos usando unoserver",
   "main": "app.js",
   "scripts": {
     "start": "node app.js"
   },
   "dependencies": {
-    "axios": "^0.21.1",
-    "express": "^4.17.1",
-    "multer": "^1.4.2"
+    "axios": "^1.7.7",
+    "express": "^4.21.1",
+    "multer": "^1.4.4",
+    "winston": "3.15.0"
   }
 }
 
